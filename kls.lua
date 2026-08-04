@@ -19,7 +19,7 @@ m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can 
                       -- edit if weird
             
 return m
-]]
+]] -- og from config.lua
 
 local config
 
@@ -66,6 +66,12 @@ local function warn(text)
     io.flush()
 end
 
+
+-- ================================voids=================================
+--[[
+    the tui functions start with t ex. tdos
+    cli functions start with c ex. cdos
+--]]
 local function tdos()
     colord:reset()
     colord:erasesavedL()
@@ -84,10 +90,12 @@ local function exit() -- exit and clean up
     os.exit()
 end
 
+-- =======================functions name for tui=========================
+
 local tchoice = {
     dos = "DoS attack the request url",
     exit = "exit"
-}
+} -- this only show des
 
 local justrun = {
         dos = {
@@ -96,13 +104,16 @@ local justrun = {
         exit = {
             run = function() exit() end
         }
-    }
+    } -- alias functions here
+
+-- ======================================================================
 
 local function cli()
     print("cli")
 end
 
 local function tui()
+    -- i can't explain this
     while true do
         io.write("\n")
         colord:reset()
