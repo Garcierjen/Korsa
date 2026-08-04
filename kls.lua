@@ -71,6 +71,7 @@ local function tdos()
     colord:erasesavedL()
     colord:eraseall()
     io.write(colord:cursorinvis())
+    warn(socket._VERSION.."\n")
     io.write("Target : ")
     local input = io.read()
 end
