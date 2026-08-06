@@ -24,7 +24,7 @@ elseif config.ESC == "Ctrl-Key" then
     ESC = "^["
 elseif config.ESC == "Decimal" then
     ESC = "27"
-end
+end --dont know what this is, this is mention in esc doc
 
 --#region private voids
 
