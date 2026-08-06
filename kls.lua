@@ -50,35 +50,35 @@ else
         print("Error creating config file: " .. tostring(err))
     end
 end
+
 if config.useproxies then
-
-local input_filename = "http.txt"
-local output_filename = "proxies.lua"
-local input_file, err = io.open(input_filename, "r")
-if not input_file then
-    print("Error opening input file: " .. tostring(err).."skipping")
-    return
-end
-local output_file, err = io.open(output_filename, "w")
-if not output_file then
-    print("Error opening output file: " .. tostring(err))
-    input_file:close()
-    return
-end
-output_file:write("local proxies = {\n")
-for line in input_file:lines() do
-    local clean_line = line:match("^%s*(.-)%s*$")
-    if clean_line ~= "" then
-        clean_line = clean_line:gsub('"', '\\"')
-        output_file:write(string.format('    "%s",\n', clean_line))
+    local input_filename = "http.txt"
+    local output_filename = "proxies.lua"
+    local input_file, err = io.open(input_filename, "r")
+    if not input_file then
+        print("Error opening input file: " .. tostring(err).."skipping")
+        return
     end
+    local output_file, err = io.open(output_filename, "w")
+    if not output_file then
+        print("Error opening output file: " .. tostring(err))
+        input_file:close()
+        return
+    end
+    output_file:write("local proxies = {\n")
+    for line in input_file:lines() do
+        local clean_line = line:match("^%s*(.-)%s*$")
+        if clean_line ~= "" then
+            clean_line = clean_line:gsub('"', '\\"')
+            output_file:write(string.format('    "%s",\n', clean_line))
+        end
+    end
+    output_file:write("}\n\nreturn proxies\n")
+    input_file:close()
+    output_file:close()
+    proxies = require("proxies")
 end
-output_file:write("}\n\nreturn proxies\n")
-input_file:close()
-output_file:close()
 
-proxies = require("proxies")
-end
 local colord = require("colord")
 local prettytext = require("prettytext")
 local socket = require('socket')
@@ -114,9 +114,23 @@ local function tdos()
     io.write(colord:cursorinvis())
     io.write("Target : ")
     local inputhost = io.read()
-    io.write("Port (note: http = 80, *https = 443) : ")
+    if config.tdosportdefault == "https" then
+            io.write("Port (note: http = 80, *https = 443) : ")
+        elseif config.tdosportdefault == "http" then
+            io.write("Port (note: *http = 80, https = 443) : ")
+        else
+            warn("invaild in tdosportdefault")
+        end
     local inputport = io.read()
-    if tonumber(inputport) == nil then inputport = 443 end
+    if tonumber(inputport) == nil then 
+        if config.tdosportdefault == "https" then
+            inputport = 443 
+        elseif config.tdosportdefault == "http" then
+            inputport = 80
+        else
+            warn("invaild in tdosportdefault")
+        end
+    end
     if config.uselanes then
         while true do
             if config.useproxies then
@@ -214,12 +228,14 @@ local function tui()
 end
 
 local function main()
-    if config.defaultmode == 1 then
+    if config.defaultmode == "cli" then
         warn("mode = cli")
         cli()
-    elseif config.defaultmode == 2 then
+    elseif config.defaultmode == "tui" then
         warn("mode = tui")
         tui()
+    else
+        warn("invalid mode")
     end
     return 0
 end
