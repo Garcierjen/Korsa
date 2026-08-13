@@ -14,7 +14,7 @@ deps.txt    kls.lua         proxies.lua (auto-generate)     useragent.lua
 
 ## Dependencies  :
 
-- **Installation** : I recommended installing modules with [Luarocks] or compile from source
+- **Installation** : I recommended installing modules with [Luarocks](https://luarocks.org) or compile from source
 
 - **Modules** : [luasocket](https://github.com/lunarmodules/luasocket), [lanes](https://github.com/LuaLanes/lanes), [milua](https://github.com/MiguelMJ/Milua) (Optional)
 

