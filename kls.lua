@@ -10,7 +10,7 @@ local config_content = [[
 
 local m = {}
 
-m.defaultmode = 2 -- [ note: 1 for cli, 2 for tui ]
+m.defaultmode = "tui" -- [ note: cli, tui ]
 
 m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
                       -- [ "Octal", "Ctrl-Key", "Unicode", "Hexadecimal", "Decimal"          ]
@@ -19,6 +19,7 @@ m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can 
                       -- edit if weird
 
 --dos
+m.tdosportdefault = "https" -- [note: http, https]
 m.useproxies = false -- skip proxies txt to lua convert if false
 m.uselanes = false -- multithread note: this clogs up thread so fast
             
@@ -102,6 +103,15 @@ local function warn(text)
     io.flush()
 end
 
+
+local function exit() -- exit and clean up
+    colord:reset()
+    colord:erasesavedL()
+    colord:eraseall()
+    io.write(colord:cursorvis())
+    os.exit()
+end
+
 -- ================================voids=================================
 --[[
     the tui functions start with t ex. tdos
@@ -120,6 +130,7 @@ local function tdos()
             io.write("Port (note: *http = 80, https = 443) : ")
         else
             warn("invaild in tdosportdefault")
+            exit()
         end
     local inputport = io.read()
     if tonumber(inputport) == nil then 
@@ -129,6 +140,7 @@ local function tdos()
             inputport = 80
         else
             warn("invaild in tdosportdefault")
+            exit()
         end
     end
     if config.uselanes then
@@ -164,15 +176,6 @@ local function tdos()
     end
 end
 
-
-local function exit() -- exit and clean up
-    colord:reset()
-    colord:erasesavedL()
-    colord:eraseall()
-    io.write(colord:cursorvis())
-    os.exit()
-end
-
 -- =======================functions name for tui=========================
 
 local tchoice = {
@@ -193,6 +196,7 @@ local justrun = {
 
 local function cli()
     print("cli")
+    exit()
 end
 
 local function tui()
@@ -236,6 +240,7 @@ local function main()
         tui()
     else
         warn("invalid mode")
+        exit()
     end
     return 0
 end
