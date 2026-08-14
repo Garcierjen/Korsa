@@ -138,17 +138,17 @@ function m:erasesavedL()
     io.flush()
 end
 
----@return any
+---@return string
 function m:eraseinline()
     return ESC.."[K"
 end
 
----@return any
+---@return string
 function m:erasestartline()
     return ESC.."[1K"
 end
 
----@return any
+---@return string
 function m:eraseentireline()
     return ESC.."[2K"
 end
@@ -208,19 +208,32 @@ function m:bit16setcolor(colorfg, colorbg, mode, gmode)
 end
 
 -- note: fg and bg are seperated unlike 16 bit coloring the usage would be like colord:b256setcolor(234,fg) colord:b256setcolor(241,bg)
+---@param color number
+---@param mode string
+---@return string?
 function m:b256setcolor(color, mode)
     if mode == "fg" and color <= 255 then
         return ESC.."[38;5;"..color.."m"
     elseif mode == "bg" and color <= 255 then
         return ESC.."[48;5;"..color.."m"
+    else
+        return nil
     end
 end
 
+--rgb for truecolor term
+---@param r number
+---@param g number
+---@param b number
+---@param mode string
+---@return string?
 function m:rgbsetcolor(r, g, b, mode)
     if mode == "fg" and r <= 255 and g <= 255 and b <= 255 then
         return ESC.."[38;2;"..r..";"..g..";"..b.."m"
     elseif mode == "bg" and r <= 255 and g <= 255 and b <= 255 then
         return ESC.."[48;2;"..r..";"..g..";"..b.."m"
+    else
+        return nil
     end
 end
 

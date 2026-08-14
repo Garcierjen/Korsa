@@ -215,6 +215,7 @@ local function tui()
     while true do
         io.write("\n")
         colord:reset()
+        colord:cursorsethome()
         colord:erasesavedL()
         colord:eraseall()
         io.write(colord:b256setcolor(211,"fg")..branding..colord:reset())
