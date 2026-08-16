@@ -23,6 +23,7 @@ m.tdosportdefault = "https" -- [note: http, https]
 m.useproxies = false -- skip proxies txt to lua convert if false
 m.uselanes = false -- multithread note: this clogs up thread so fast
 m.MAXTASK = 64 --attack in chunks fix thread clog up
+m.packetsize = 1024 --this is in byte
              
 return m
 ]] -- og from config.lua
@@ -58,7 +59,7 @@ if config.useproxies then
     local output_filename = "proxies.lua"
     local input_file, err = io.open(input_filename, "r")
     if not input_file then
-        print("Error opening input file: " .. tostring(err).."skipping")
+        print("Error opening input file: " .. tostring(err).." skipping")
         return
     end
     local output_file, err = io.open(output_filename, "w")
@@ -264,10 +265,8 @@ end
 
 local function main()
     if config.defaultmode == "cli" then
-        warn("mode = cli")
         cli()
     elseif config.defaultmode == "tui" then
-        warn("mode = tui")
         tui()
     else
         warn("invalid mode")
