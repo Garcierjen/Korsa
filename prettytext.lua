@@ -1,6 +1,6 @@
 -- [ filename: prettytext.lua                                         ]
 -- [ An overcomplicated piece of styling code for your cli -garcierjen]
-
+-- for korsa it's reserve for future use 
 local m = {}
 local colord = require("colord")
 

