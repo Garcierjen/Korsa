@@ -72,15 +72,22 @@ if config.useproxies then
     for line in input_file:lines() do
         local clean_line = line:match("^%s*(.-)%s*$")
         if clean_line ~= "" then
-            clean_line = clean_line:gsub('"', '\\"')
-            output_file:write(string.format('    "%s",\n', clean_line))
+            local ip, port = clean_line:match("^([^:]+):(%d+)$")
+            
+            if ip and port then
+                output_file:write(string.format('    {ip = "%s", port = %d},\n', ip, tonumber(port)))
+            else
+                print("Warning: Invalid proxy format skipped -> " .. clean_line)
+            end
         end
     end
     output_file:write("}\n\nreturn proxies\n")
+    
     input_file:close()
     output_file:close()
     proxies = require("proxies")
 end
+
 
 local colord = require("colord")
 local prettytext = require("prettytext")
@@ -118,6 +125,7 @@ local function exit() -- exit and clean up
 end
 
 local function randchar(leng)
+    math.randomseed(os.time())
     local res = ""
     for i = 1, leng do
         local rand_index = math.random(1, string.len(charf))
@@ -125,6 +133,19 @@ local function randchar(leng)
     end
     return res
 end
+
+local randproxy
+
+if config.useproxies then
+    randproxy = function()
+        math.randomseed(os.time())
+        if not proxies or #proxies == 0 then return nil end
+        return proxies[math.random(1, #proxies)]
+    end
+elseif not config.useproxies then
+    warn("proxies is off")
+end
+
 
 -- ================================voids=================================
 --[[
@@ -164,7 +185,6 @@ local function tdos()
             if config.useproxies then
                 print("proxies")
             else
-
                 for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
@@ -208,19 +228,34 @@ local function tdos()
     end
 end
 
+local function tddos() --lol
+    prettytext:wait(1)
+    io.write("calling my friends\n")
+    prettytext:wait(1)
+    warn("not found\n")
+    prettytext:wait(1)
+    io.write("calling my pawns\n")
+    prettytext:wait(1)
+    warn("calling 67 billion peoples\n")
+    prettytext:wait(1)
+    warn("welcome back master manipulator\n")
+    prettytext:wait(1)
+    exit()
+end
+
 -- =======================functions name for tui=========================
 
 local tchoice = {
     dos = "DoS attack the request url",
-    exit = "exit"
+    ddos = "DDoS attack unfinish"
 } -- this only show des
 
 local justrun = {
         dos = {
             run = function() tdos() end
         },
-        exit = {
-            run = function() exit() end
+        ddos = {
+            run = function() tddos() end
         }
     } -- alias functions here
 
@@ -249,9 +284,12 @@ local function tui()
             table.insert(idn,i)
             count = count + 1
         end
+        io.write(string.format("    "..colord:b256setcolor(218,"fg").."q : "..colord:b256setcolor(218,"fg").."exit\n"..colord:reset()))
         io.write(colord:b256setcolor(213,"fg").."choice : "..colord:reset())
         local input = io.read()
-        if tonumber(input) == nil then
+        if string.lower(input) == "q" then
+            exit()
+        elseif tonumber(input) == nil then
             warn("numbers please.\n")
         elseif tonumber(input) > count then
             warn("out of range.\n")
