@@ -14,6 +14,8 @@ deps.txt    kls.lua         proxies.lua (auto-generate)     useragent.lua
 
 ## Dependencies  :
 
+- **Lua** : Tested on lua5.4 but other version should be fine.
+
 - **Installation** : I recommended installing modules with [Luarocks](https://luarocks.org) or compile from source
 
 - **Modules** : [luasocket](https://github.com/lunarmodules/luasocket), [lanes](https://github.com/LuaLanes/lanes), [milua](https://github.com/MiguelMJ/Milua) (Optional)
@@ -36,3 +38,6 @@ ip:port
 ## Binary Compiling  :
 
 - This can be done using srlua but luaot is also a great alternative
+
+- **Lang use:**
+  [![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)](https://www.lua.org/)
