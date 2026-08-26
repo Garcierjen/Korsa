@@ -38,6 +38,7 @@ ip:port
 ## Binary Compiling  :
 
 - This can be done using srlua but luaot is also a great alternative
+- For Makefile it require luacc for bundling
 
 - **Lang use:**
   [![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)](https://www.lua.org/)
