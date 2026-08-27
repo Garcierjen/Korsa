@@ -1,6 +1,5 @@
 test.lua
 proxies.lua
 config.lua
-korsa
 *.out
 *.o
