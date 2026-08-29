@@ -183,7 +183,7 @@ local function tdos()
     if config.uselanes then
         while true do
             if config.useproxies then
-                print("proxies")
+                print("proxies") --this will remain unfinish
             else
                 for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
@@ -212,7 +212,7 @@ local function tdos()
         else
             while true do
                 if config.useproxies then
-                    print("proxies")
+                    print("proxies") -- this will remain unfinish 
                 else
                     for i = 1, 10 do
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
