@@ -10,8 +10,6 @@ local config_content = [[
 
 local m = {}
 
-m.defaultmode = "tui" -- [ note: cli, tui ]
-
 m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
                       -- [ "Octal", "Ctrl-Key", "Unicode", "Hexadecimal", "Decimal"          ]
                       -- ANSI Escape Sequences doc : https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
@@ -229,6 +227,7 @@ local function tdos()
 end
 
 local function help()
+    io.write("\n")
     warn("cli: help")
 end
 
@@ -265,11 +264,15 @@ local justrun = {
 
 -- ======================================================================
 
+local cchoice = {
+    dos = "lol",
+    ddos = "lol"
+}
+
 local function cli(argv)
-    if not argv then
+    if not cchoice[tostring(argv)] then
         help()
     end
-    exit()
 end
 
 local function tui()
@@ -308,15 +311,10 @@ local function tui()
 end
 
 local function main()
-    local jk = tostring(arg[1])
-    if config.defaultmode == "cli" then
-        cli()
-    elseif config.defaultmode == "tui" then
+    if not arg[1] then
         tui()
-    elseif not jk then
-        tui()
-    elseif jk then
-        cli(jk)
+    elseif arg[1] then
+        cli(tostring(arg[1]))
     else
         warn("invalid mode")
         exit()
