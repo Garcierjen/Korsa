@@ -212,7 +212,7 @@ local function tdos()
         else
             while true do
                 if config.useproxies then
-                    print("proxies") -- this will remain unfinish 
+                    print("proxies") -- this will remain unfinish bc it's similar to ddos
                 else
                     for i = 1, 10 do
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
@@ -226,6 +226,10 @@ local function tdos()
                 end
             end
     end
+end
+
+local function help()
+    warn("cli: help")
 end
 
 local function tddos() --lol
@@ -261,8 +265,10 @@ local justrun = {
 
 -- ======================================================================
 
-local function cli()
-    print("cli")
+local function cli(argv)
+    if not argv then
+        help()
+    end
     exit()
 end
 
@@ -302,10 +308,15 @@ local function tui()
 end
 
 local function main()
+    local jk = tostring(arg[1])
     if config.defaultmode == "cli" then
         cli()
     elseif config.defaultmode == "tui" then
         tui()
+    elseif not jk then
+        tui()
+    elseif jk then
+        cli(jk)
     else
         warn("invalid mode")
         exit()
