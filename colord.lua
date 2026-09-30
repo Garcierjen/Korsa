@@ -14,16 +14,18 @@ local ESC
 
 -- set esc
 
-if config.ESC == "Hexadecimal" then
+if config and config.ESC == "Hexadecimal" then
     ESC = "\x1B"
-elseif config.ESC == "Octal" then
+elseif config and config.ESC == "Octal" then
     ESC = "\033"
-elseif config.ESC == "Unicode" then
+elseif config and config.ESC == "Unicode" then
     ESC = [[\u001b]]
-elseif config.ESC == "Ctrl-Key" then
+elseif config and config.ESC == "Ctrl-Key" then
     ESC = "^["
-elseif config.ESC == "Decimal" then
+elseif config and config.ESC == "Decimal" then
     ESC = "27"
+else
+    ESC = ""
 end --dont know what this is, this is mention in esc doc
 
 --#region private voids
@@ -36,77 +38,77 @@ end --dont know what this is, this is mention in esc doc
 -- Cursor Controls
 
 function m:cursorsethome()
-    io.write(ESC.."[H")
+    io.write(tostring(ESC).."[H")
     io.flush()
 end
 
 function m:cursortoLtoCH(Line, Column)
-    io.write(ESC..'['..Line..';'..Column..'H')
+    io.write(tostring(ESC)..'['..Line..';'..Column..'H')
     io.flush()
 end
 
 function m:cursortoLtoCF(Line, Column)
-    io.write(ESC..'['..Line..';'..Column..'f')
+    io.write(tostring(ESC)..'['..Line..';'..Column..'f')
     io.flush()
 end
 
 function m:cursorup(Line)
-    io.write(ESC..'['..Line..'A')
+    io.write(tostring(ESC)..'['..Line..'A')
     io.flush()
 end
 
 function m:cursordown(Line)
-    io.write(ESC..'['..Line..'B')
+    io.write(tostring(ESC)..'['..Line..'B')
     io.flush()
 end
 
 function m:cursorright(Column)
-    io.write(ESC..'['..Column..'C')
+    io.write(tostring(ESC)..'['..Column..'C')
     io.flush()
 end
 
 function m:cursorleft(Column)
-    io.write(ESC..'['..Column..'D')
+    io.write(tostring(ESC)..'['..Column..'D')
     io.flush()
 end
 
 function m:cursorbegN(Line)
-    io.write(ESC..'['..Line..'E')
+    io.write(tostring(ESC)..'['..Line..'E')
     io.flush()
 end
 
 function m:cursorbegP(Line)
-    io.write(ESC..'['..Line..'F')
+    io.write(tostring(ESC)..'['..Line..'F')
     io.flush()
 end
 
 function m:cursortoCol(Column)
-    io.write(ESC..'['..Column..'G')
+    io.write(tostring(ESC)..'['..Column..'G')
     io.flush()
 end
 
 function m:cursorlineup()
-    io.write(ESC.."M")
+    io.write(tostring(ESC).."M")
     io.flush()
 end
 
 function m:cursaveposDEC()
-    io.write(ESC.."7")
+    io.write(tostring(ESC).."7")
     io.flush()
 end
 
 function m:curtosaveDEC()
-    io.write(ESC.."8")
+    io.write(tostring(ESC).."8")
     io.flush()
 end
 
 function m:cursaveposSCO()
-    io.write(ESC.."[s")
+    io.write(tostring(ESC).."[s")
     io.flush()
 end
 
 function m:curtosaveSCO()
-    io.write(ESC.."[u")
+    io.write(tostring(ESC).."[u")
     io.flush()
 end
 
@@ -119,38 +121,38 @@ end
 -- Erase Functions
 
 function m:eraseindis()
-    io.write(ESC.."[J")
+    io.write(tostring(ESC).."[J")
     io.flush()
 end
 
 function m:erasecurbeg()
-    io.write(ESC.."[1J")
+    io.write(tostring(ESC).."[1J")
     io.flush()
 end
 
 function m:eraseall()
-    io.write(ESC.."[2J")
+    io.write(tostring(ESC).."[2J")
     io.flush()
 end
 
 function m:erasesavedL()
-    io.write(ESC.."[3J")
+    io.write(tostring(ESC).."[3J")
     io.flush()
 end
 
 ---@return string
 function m:eraseinline()
-    return ESC.."[K"
+    return tostring(ESC).."[K"
 end
 
 ---@return string
 function m:erasestartline()
-    return ESC.."[1K"
+    return tostring(ESC).."[1K"
 end
 
 ---@return string
 function m:eraseentireline()
-    return ESC.."[2K"
+    return tostring(ESC).."[2K"
 end
 
 --[[
@@ -164,7 +166,7 @@ end
 -- reset all color and mode
 ---@return string
 function m:reset()
-    return ESC.."[0m"
+    return tostring(ESC).."[0m"
 end
 
 -- 16 bit set color note: this can be use as graphic mode for styling like italic
@@ -193,13 +195,13 @@ function m:bit16setcolor(colorfg, colorbg, mode, gmode)
     local bg_code = validcolorbg[colorbg] or validcolorbg.Default
     local g_code = validgmode[gmode] or validgmode.normal
     if mode == "fg" then
-        return ESC.."["..g_code..";"..fg_code.."m"
+        return tostring(ESC).."["..g_code..";"..fg_code.."m"
     elseif mode == "bg" then
-        return ESC.."["..g_code..";"..bg_code.."m"
+        return tostring(ESC).."["..g_code..";"..bg_code.."m"
     elseif mode == "both" then
-        return ESC.."["..g_code..";"..fg_code..";"..bg_code.."m"
+        return tostring(ESC).."["..g_code..";"..fg_code..";"..bg_code.."m"
     elseif mode == "graphic" then
-        return ESC.."["..g_code.."m"
+        return tostring(ESC).."["..g_code.."m"
     elseif mode == "none" then
         io.write('colord:bit16setcolor() : "why?"\n')
         io.flush()
@@ -213,9 +215,9 @@ end
 ---@return string?
 function m:b256setcolor(color, mode)
     if mode == "fg" and color <= 255 then
-        return ESC.."[38;5;"..color.."m"
+        return tostring(ESC).."[38;5;"..color.."m"
     elseif mode == "bg" and color <= 255 then
-        return ESC.."[48;5;"..color.."m"
+        return tostring(ESC).."[48;5;"..color.."m"
     else
         return nil
     end
@@ -229,9 +231,9 @@ end
 ---@return string?
 function m:rgbsetcolor(r, g, b, mode)
     if mode == "fg" and r <= 255 and g <= 255 and b <= 255 then
-        return ESC.."[38;2;"..r..";"..g..";"..b.."m"
+        return tostring(ESC).."[38;2;"..r..";"..g..";"..b.."m"
     elseif mode == "bg" and r <= 255 and g <= 255 and b <= 255 then
-        return ESC.."[48;2;"..r..";"..g..";"..b.."m"
+        return tostring(ESC).."[48;2;"..r..";"..g..";"..b.."m"
     else
         return nil
     end
@@ -241,35 +243,37 @@ end
 -- Common Private Modes
 
 function m:cursorinvis()
-    io.write(ESC.."[?25l")
+    io.write(tostring(ESC).."[?25l")
     io.flush()
 end
 
 function m:cursorvis()
-    io.write(ESC.."[?25h")
+    io.write(tostring(ESC).."[?25h")
     io.flush()
 end
 
 function m:restorescreen()
-    io.write(ESC.."[?47l")
+    io.write(tostring(ESC).."[?47l")
     io.flush()
 end
 
 function m:savescreen()
-    io.write(ESC.."[?47h")
+    io.write(tostring(ESC).."[?47h")
     io.flush()
 end
 
 function m:enablealtbuff()
-    io.write(ESC.."[?1049h")
+    io.write(tostring(ESC).."[?1049h")
     io.flush()
 end
 
 function m:disablealtbuff()
-    io.write(ESC.."[?1049l")
+    io.write(tostring(ESC).."[?1049l")
     io.flush()
 end
 
 --#endregion public voids
+
+--sum stuff
 
 return m

