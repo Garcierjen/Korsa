@@ -8,8 +8,8 @@ Written for basic pentesting.
 
 ```bash
 $ ls
-colord.lua  dostestweb.html config.lua (auto-generate)  dostestweb.lua   prettytext.lua
-deps.txt    kls.lua         proxies.lua (auto-generate)     useragent.lua
+colord.lua      config.lua (auto-generate)      dostestweb.lua   prettytext.lua
+kls.lua         proxies.lua (auto-generate)     useragent.lua
 ```
 
 ## Dependencies  :
@@ -38,6 +38,7 @@ ip:port
 ## Binary Compiling  :
 
 - This can be done using srlua but luaot is also a great alternative
+- planning to bundle this to one file
 
 - **Lang use:**
   [![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)](https://www.lua.org/)

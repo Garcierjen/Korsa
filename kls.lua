@@ -10,7 +10,7 @@ local config_content = [[
 
 local m = {}
 
-m.ESCc = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
+m.ESC = "Hexadecimal" -- [ note: On different OS have their own ANSI Escape can be change to ]
                       -- [ "Octal", "Ctrl-Key", "Unicode", "Hexadecimal", "Decimal"          ]
                       -- ANSI Escape Sequences doc : https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b
                       -- on unix can be check via echo $COLORTERM or just env and scroll
@@ -24,7 +24,7 @@ m.MAXTASK = 64 --attack in chunks fix thread clog up
 m.packetsize = 1024 --this is in byte
              
 return m
-]] -- og from config.lua
+]] -- og from config.lua updatw
 
 local config
 local proxies
@@ -239,8 +239,7 @@ local function cdos()
         elseif config.tdosportdefault == "http" then
             port = 80
         else
-            warn("invaild in tdosportdefault")
-            exit()
+            warn("invaild in tdosportdefault also input the port")
         end
     end
     if config.uselanes then
