@@ -6,7 +6,7 @@
 -- [                                                               ]
 -- [ filename: colord.lua                                          ]
 -- this is just aliasing stuff
--- [ more info: https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b ]
+-- [ more info: https://ansi.tools ]
 
 local m = {}
 local config = require("config")
@@ -21,9 +21,9 @@ elseif config and config.ESC == "Octal" then
 elseif config and config.ESC == "Unicode" then
     ESC = [[\u001b]]
 elseif config and config.ESC == "Ctrl-Key" then
-    ESC = "^["
+    ESC = "\^["
 elseif config and config.ESC == "Decimal" then
-    ESC = "27"
+    ESC = "\27"
 else
     ESC = ""
 end --dont know what this is, this is mention in esc doc
