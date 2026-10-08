@@ -21,7 +21,7 @@ elseif config and config.ESC == "Octal" then
 elseif config and config.ESC == "Unicode" then
     ESC = [[\u001b]]
 elseif config and config.ESC == "Ctrl-Key" then
-    ESC = "\^["
+    ESC = [[\^[]]
 elseif config and config.ESC == "Decimal" then
     ESC = "\27"
 else
