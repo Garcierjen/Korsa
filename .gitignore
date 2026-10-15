@@ -3,3 +3,4 @@ proxies.lua
 config.lua
 *.out
 *.o
+*.so

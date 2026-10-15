@@ -24,7 +24,7 @@ m.MAXTASK = 64 --attack in chunks fix thread clog up
 m.packetsize = 1024 --this is in byte
              
 return m
-]] -- og from config.lua updatw
+]] -- og from config.lua update
 
 local config
 local proxies
