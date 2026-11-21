@@ -26,7 +26,7 @@ function m:typewrite(text, time)
         m:wait(del)
     end
     io.flush()
-end
+end --this is in linear keyframes
 
 --spinning loading from npm
 ---@param time number

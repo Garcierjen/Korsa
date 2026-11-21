@@ -5662,4 +5662,11 @@ m.ua = {"Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.
 	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"
 }
 
+
+--[[
+function m:rand()
+	return tostring(m.ua[math.random(#m.ua)])
+end
+--]]
+
 return m

