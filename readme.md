@@ -40,5 +40,10 @@ ip:port
 - This can be done using srlua but luaot is also a great alternative
 - planning to bundle this to one file
 
+## Bug report  :
+
+- Report bug in my email : garcierjen@gmail.com
+- Tell : How to recreate, Environment (OS, Terminal, Lua version)
+
 - **Lang use:**
   [![Lua](https://img.shields.io/badge/lua-%232C2D72.svg?style=for-the-badge&logo=lua&logoColor=white)](https://www.lua.org/)

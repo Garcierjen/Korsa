@@ -413,14 +413,16 @@ local function cddos() --lol
 end
 
 local function tdirbust()
-    
+    local wordlist --read txt
+    local Target
 end
 
 local function cdirbust()
-    
+    local wordlist --read txt
+    local Target
 end
 
--- i should combine
+-- i should combine all functions and just specify the variation
 
 -- =======================functions name for tui=========================
 
